@@ -1,6 +1,6 @@
-# moj-savjetnik
+# Moj-Savjetnik
 
-moj-savjetnik is an app dedicated to managing personal finances with the help of AI.
+MojSavjetnik is an app dedicated to managing personal finances with the help of AI.
 
 It's core features are:
   1) Financial diary - all purchases can be manually put in
