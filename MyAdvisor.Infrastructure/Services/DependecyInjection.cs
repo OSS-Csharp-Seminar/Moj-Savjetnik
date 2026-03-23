@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,21 +16,35 @@ namespace MyAdvisor.Infrastructure.Services
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
+                ?? throw new InvalidOperationException("JwtSettings are not configured.");
+
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseMySQL(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole<int>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<IAuthService, AuthService>();
-
-            services.Configure<JwtSettings>(
-            configuration.GetSection("JwtSettings"));
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParametersFactory(
+                    Microsoft.Extensions.Options.Options.Create(jwtSettings)).Create();
+            });
 
             services.AddSingleton<JwtTokenGenerator>();
-            services.AddSingleton<TokenValidationParametersFactory>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

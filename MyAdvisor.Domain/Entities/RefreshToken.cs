@@ -1,4 +1,3 @@
-﻿
 namespace MyAdvisor.Domain.Entities
 {
     public class RefreshToken
@@ -12,23 +11,26 @@ namespace MyAdvisor.Domain.Entities
         public string? CreatedByIp { get; private set; }
         public string? RevokedByIp { get; private set; }
         public DateTime? RevokedAt { get; private set; }
-        private RefreshToken() { }
+
+        private RefreshToken() { Token = null!; }
+
         public RefreshToken(string token, int userId, DateTime expiryDate, string? createdByIp = null)
         {
             if (string.IsNullOrWhiteSpace(token))
-                throw new ArgumentException("Token cannot be empty", nameof(token));
+                throw new ArgumentException("Token cannot be empty.", nameof(token));
 
             if (expiryDate <= DateTime.UtcNow)
-                throw new ArgumentException("Expiry must be in the future", nameof(expiryDate));
+                throw new ArgumentException("Expiry must be in the future.", nameof(expiryDate));
 
             Token = token;
             UserId = userId;
             ExpiryDate = expiryDate;
             CreatedAt = DateTime.UtcNow;
             CreatedByIp = createdByIp;
-            IsRevoked = false;
         }
+
         public bool IsActive => !IsRevoked && DateTime.UtcNow < ExpiryDate;
+
         public void Revoke(string? revokedByIp = null)
         {
             if (IsRevoked) return;
@@ -39,4 +41,3 @@ namespace MyAdvisor.Domain.Entities
         }
     }
 }
-

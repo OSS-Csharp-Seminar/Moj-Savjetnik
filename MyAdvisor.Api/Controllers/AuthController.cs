@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MyAdvisor.Application.DTOs;
 using MyAdvisor.Application.Interfaces;
 
@@ -18,29 +18,57 @@ namespace MyAdvisor.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {
-            var result = await _authService.RegisterAsync(request);
-            return Ok(result);
+            try
+            {
+                var result = await _authService.RegisterAsync(request);
+                return StatusCode(StatusCodes.Status201Created, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
-            var result = await _authService.LoginAsync(request);
-            return Ok(result);
+            try
+            {
+                var result = await _authService.LoginAsync(request);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshRequestDto request)
         {
-            var result = await _authService.RefreshAsync(request);
-            return Ok(result);
+            try
+            {
+                var result = await _authService.RefreshAsync(request);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Unauthorized(new { error = ex.Message });
+            }
         }
 
         [HttpPost("revoke")]
         public async Task<IActionResult> Revoke(RevokeRequestDto request)
         {
-            await _authService.RevokeAsync(request);
-            return Ok();
+            try
+            {
+                await _authService.RevokeAsync(request);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

@@ -1,19 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MyAdvisor.Domain.Entities;
+using MyAdvisor.Infrastructure.Identity;
 
 namespace MyAdvisor.Infrastructure.Persistence
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Category> Categories => Set<Category>();
-        public DbSet<FinancialDiary> FinancialDiaries => Set<FinancialDiary>();
-        public DbSet<Transaction> Transactions => Set<Transaction>();
-        public DbSet<TransactionAiLog> TransactionAiLogs => Set<TransactionAiLog>();
-        public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
-        public DbSet<SpendingStatistic> SpendingStatistics => Set<SpendingStatistic>();
-        public DbSet<CategoryStatistic> CategoryStatistics => Set<CategoryStatistic>();
-        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<User> DomainUsers { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<FinancialDiary> FinancialDiaries { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<TransactionAiLog> TransactionAiLogs { get; set; }
+        public DbSet<RecurringTransaction> RecurringTransactions { get; set; }
+        public DbSet<SpendingStatistic> SpendingStatistics { get; set; }
+        public DbSet<CategoryStatistic> CategoryStatistics { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
@@ -21,6 +24,8 @@ namespace MyAdvisor.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>().ToTable("Users");
 
             modelBuilder.Entity<Category>()
                 .HasOne(c => c.ParentCategory)
@@ -80,16 +85,8 @@ namespace MyAdvisor.Infrastructure.Persistence
             modelBuilder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.Token)
-                    .IsRequired();
-
-                entity.HasIndex(x => x.Token)
-                    .IsUnique();
-
-                entity.HasOne<User>() 
-                    .WithMany()
-                    .HasForeignKey(x => x.UserId);
+                entity.Property(x => x.Token).IsRequired();
+                entity.HasIndex(x => x.Token).IsUnique();
             });
         }
     }

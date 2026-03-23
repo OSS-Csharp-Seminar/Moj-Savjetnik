@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: myadvisor_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: MyAdvisorDb
+      MYSQL_USER: myadvisor
+      MYSQL_PASSWORD: myadvisor123
+    ports:
+      - "3306:3306"
+    volumes:
+      - myadvisor_mysql_data:/var/lib/mysql
+
+volumes:
+  myadvisor_mysql_data:

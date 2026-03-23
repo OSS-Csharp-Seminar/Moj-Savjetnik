@@ -1,17 +1,19 @@
-﻿namespace MyAdvisor.Domain.Entities
+namespace MyAdvisor.Domain.Entities
 {
     public class RecurringTransaction
     {
         public int Id { get; private set; }
         public int UserId { get; private set; }
         public int CategoryId { get; private set; }
-        public decimal? Amount { get; private set; }
-        public string? Frequency { get; private set; }
+        public decimal Amount { get; private set; }
+        public string Frequency { get; private set; }
         public DateTime? NextDueDate { get; private set; }
         public string? Description { get; private set; }
-        public User User { get; private set; }
-        public Category Category { get; private set; }
-        private RecurringTransaction() { }
+        public User? User { get; private set; }
+        public Category? Category { get; private set; }
+
+        private RecurringTransaction() { Frequency = null!; }
+
         public RecurringTransaction(
             int userId,
             int categoryId,
@@ -21,16 +23,16 @@
             string? description = null)
         {
             if (userId <= 0)
-                throw new ArgumentException("Invalid userId");
+                throw new ArgumentException("Invalid userId.", nameof(userId));
 
             if (categoryId <= 0)
-                throw new ArgumentException("Invalid categoryId");
+                throw new ArgumentException("Invalid categoryId.", nameof(categoryId));
 
-            if (amount < 0)
-                throw new ArgumentException("Amount cannot be negative");
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
 
             if (string.IsNullOrWhiteSpace(frequency))
-                throw new ArgumentException("Frequency is required");
+                throw new ArgumentException("Frequency is required.", nameof(frequency));
 
             UserId = userId;
             CategoryId = categoryId;
@@ -39,5 +41,7 @@
             NextDueDate = nextDueDate;
             Description = description;
         }
+
+        public void AdvanceDueDate(DateTime nextDueDate) => NextDueDate = nextDueDate;
     }
 }
