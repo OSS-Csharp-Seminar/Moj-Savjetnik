@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using MyAdvisor.Application.DTOs;
 using MyAdvisor.Application.Interfaces;
@@ -25,7 +26,7 @@ namespace MyAdvisor.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new ErrorResponse(ex.Message));
             }
         }
 
@@ -53,21 +54,25 @@ namespace MyAdvisor.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return Unauthorized(new ErrorResponse(ex.Message));
             }
         }
 
         [HttpPost("revoke")]
         public async Task<IActionResult> Revoke(RevokeRequestDto request)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
             try
             {
-                await _authService.RevokeAsync(request);
+                await _authService.RevokeAsync(request, userId);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new ErrorResponse(ex.Message));
             }
         }
     }

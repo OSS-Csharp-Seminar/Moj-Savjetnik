@@ -25,12 +25,17 @@ namespace MyAdvisor.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>().ToTable("Users");
+            modelBuilder.Entity<User>().ToTable("DomainUsers");
 
             modelBuilder.Entity<Category>()
                 .HasOne(c => c.ParentCategory)
                 .WithMany(c => c.SubCategories)
                 .HasForeignKey(c => c.ParentCategoryId);
+
+            modelBuilder.Entity<Category>()
+                .Navigation(c => c.SubCategories)
+                .HasField("_subCategories")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<FinancialDiary>()
                 .HasOne(d => d.User)
@@ -41,6 +46,11 @@ namespace MyAdvisor.Infrastructure.Persistence
                 .HasOne(t => t.Diary)
                 .WithMany(d => d.Transactions)
                 .HasForeignKey(t => t.DiaryId);
+
+            modelBuilder.Entity<FinancialDiary>()
+                .Navigation(d => d.Transactions)
+                .HasField("_transactions")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<Transaction>()
                 .HasOne(t => t.Category)
@@ -76,6 +86,11 @@ namespace MyAdvisor.Infrastructure.Persistence
                 .HasOne(cs => cs.Statistics)
                 .WithMany(s => s.CategoryBreakdown)
                 .HasForeignKey(cs => cs.StatisticsId);
+
+            modelBuilder.Entity<SpendingStatistic>()
+                .Navigation(s => s.CategoryBreakdown)
+                .HasField("_categoryBreakdown")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<CategoryStatistic>()
                 .HasOne(cs => cs.Category)

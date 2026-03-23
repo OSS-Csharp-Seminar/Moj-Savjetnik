@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyAdvisor.Application.Interfaces;
+using MyAdvisor.Application.Interfaces.Repositories;
 using MyAdvisor.Infrastructure.Auth;
 using MyAdvisor.Infrastructure.Identity;
 using MyAdvisor.Infrastructure.Persistence;
+using MyAdvisor.Infrastructure.Repositories;
 
 namespace MyAdvisor.Infrastructure.Services
 {
@@ -45,6 +47,16 @@ namespace MyAdvisor.Infrastructure.Services
             services.AddSingleton<JwtTokenGenerator>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthService, AuthService>();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IFinancialDiaryRepository, FinancialDiaryRepository>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IRecurringTransactionRepository, RecurringTransactionRepository>();
+            services.AddScoped<ITransactionAiLogRepository, TransactionAiLogRepository>();
+            services.AddScoped<ISpendingStatisticRepository, SpendingStatisticRepository>();
+
+            services.AddHostedService<RefreshTokenCleanupService>();
 
             return services;
         }

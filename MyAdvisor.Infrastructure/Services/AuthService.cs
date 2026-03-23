@@ -71,7 +71,7 @@ namespace MyAdvisor.Infrastructure.Services
             return new AuthResponseDto(result.accessToken, result.refreshToken);
         }
 
-        public Task RevokeAsync(RevokeRequestDto request)
-            => _tokenService.RevokeAsync(request.RefreshToken);
+        public Task RevokeAsync(RevokeRequestDto request, int userId)
+            => _tokenService.RevokeAsync(request.RefreshToken, userId);
     }
 }

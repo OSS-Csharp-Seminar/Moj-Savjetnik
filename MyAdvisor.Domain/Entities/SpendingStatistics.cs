@@ -39,5 +39,12 @@ namespace MyAdvisor.Domain.Entities
 
             TotalSpent += amount;
         }
+
+        public void AddCategoryStatistic(CategoryStatistic categoryStatistic)
+        {
+            if (categoryStatistic == null)
+                throw new ArgumentNullException(nameof(categoryStatistic));
+            _categoryBreakdown.Add(categoryStatistic);
+        }
     }
 }

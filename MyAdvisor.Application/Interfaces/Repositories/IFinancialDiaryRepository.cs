@@ -1,0 +1,14 @@
+using MyAdvisor.Domain.Entities;
+
+namespace MyAdvisor.Application.Interfaces.Repositories
+{
+    public interface IFinancialDiaryRepository
+    {
+        Task<FinancialDiary?> GetByIdAsync(int id);
+        Task<IReadOnlyList<FinancialDiary>> GetByUserIdAsync(int userId);
+        Task<FinancialDiary?> GetByUserIdAndDateAsync(int userId, DateTime date);
+        Task AddAsync(FinancialDiary diary);
+        Task UpdateAsync(FinancialDiary diary);
+        Task DeleteAsync(int id);
+    }
+}

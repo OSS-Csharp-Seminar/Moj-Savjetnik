@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MyAdvisor.Application.Interfaces;
 using MyAdvisor.Domain.Entities;
 using MyAdvisor.Infrastructure.Auth;
@@ -13,12 +14,14 @@ namespace MyAdvisor.Infrastructure.Services
         private readonly JwtTokenGenerator _jwtGenerator;
         private readonly AppDbContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly JwtSettings _settings;
 
-        public TokenService(JwtTokenGenerator jwtGenerator, AppDbContext dbContext, UserManager<ApplicationUser> userManager)
+        public TokenService(JwtTokenGenerator jwtGenerator, AppDbContext dbContext, UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings)
         {
             _jwtGenerator = jwtGenerator;
             _dbContext = dbContext;
             _userManager = userManager;
+            _settings = jwtSettings.Value;
         }
 
         public string GenerateAccessToken(ITokenUser user)
@@ -29,7 +32,7 @@ namespace MyAdvisor.Infrastructure.Services
             var token = new RefreshToken(
                 Guid.NewGuid().ToString(),
                 user.Id,
-                DateTime.UtcNow.AddDays(7)
+                DateTime.UtcNow.AddDays(_settings.RefreshTokenExpirationDays)
             );
 
             await _dbContext.RefreshTokens.AddAsync(token);
@@ -57,7 +60,7 @@ namespace MyAdvisor.Infrastructure.Services
             var newRefreshToken = new RefreshToken(
                 Guid.NewGuid().ToString(),
                 ((ITokenUser)user).Id,
-                DateTime.UtcNow.AddDays(7)
+                DateTime.UtcNow.AddDays(_settings.RefreshTokenExpirationDays)
             );
 
             await _dbContext.RefreshTokens.AddAsync(newRefreshToken);
@@ -66,13 +69,16 @@ namespace MyAdvisor.Infrastructure.Services
             return (_jwtGenerator.GenerateToken(user), newRefreshToken.Token);
         }
 
-        public async Task RevokeAsync(string refreshToken)
+        public async Task RevokeAsync(string refreshToken, int userId)
         {
             var existingToken = await _dbContext.RefreshTokens
                 .FirstOrDefaultAsync(t => t.Token == refreshToken);
 
             if (existingToken == null || !existingToken.IsActive)
                 throw new InvalidOperationException("Invalid or already revoked token.");
+
+            if (existingToken.UserId != userId)
+                throw new UnauthorizedAccessException("Token does not belong to user.");
 
             existingToken.Revoke();
             await _dbContext.SaveChangesAsync();
