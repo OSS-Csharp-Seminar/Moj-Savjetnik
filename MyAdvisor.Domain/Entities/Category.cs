@@ -10,7 +10,7 @@ namespace MyAdvisor.Domain.Entities
         public Category? ParentCategory { get; private set; }
         public IReadOnlyCollection<Category> SubCategories => _subCategories.AsReadOnly();
 
-        private Category() { Name = null!; }
+        private Category() { Name = null!; } // For EF Core
 
         public Category(string name, int? parentCategoryId = null)
         {

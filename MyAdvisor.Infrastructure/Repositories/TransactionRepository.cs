@@ -5,6 +5,7 @@ using MyAdvisor.Infrastructure.Persistence;
 
 namespace MyAdvisor.Infrastructure.Repositories
 {
+    // Read-only. All writes go through FinancialDiary aggregate root.
     public class TransactionRepository : ITransactionRepository
     {
         private readonly AppDbContext _db;
@@ -19,27 +20,5 @@ namespace MyAdvisor.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<Transaction>> GetByDiaryIdAsync(int diaryId)
             => await _db.Transactions.Where(t => t.DiaryId == diaryId).ToListAsync();
-
-        public async Task AddAsync(Transaction transaction)
-        {
-            await _db.Transactions.AddAsync(transaction);
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(Transaction transaction)
-        {
-            _db.Transactions.Update(transaction);
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var transaction = await _db.Transactions.FindAsync(id);
-            if (transaction is not null)
-            {
-                _db.Transactions.Remove(transaction);
-                await _db.SaveChangesAsync();
-            }
-        }
     }
 }

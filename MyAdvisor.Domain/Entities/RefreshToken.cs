@@ -8,13 +8,11 @@ namespace MyAdvisor.Domain.Entities
         public DateTime CreatedAt { get; private set; }
         public DateTime ExpiryDate { get; private set; }
         public bool IsRevoked { get; private set; }
-        public string? CreatedByIp { get; private set; }
-        public string? RevokedByIp { get; private set; }
         public DateTime? RevokedAt { get; private set; }
 
-        private RefreshToken() { Token = null!; }
+        private RefreshToken() { Token = null!; } // For EF Core
 
-        public RefreshToken(string token, int userId, DateTime expiryDate, string? createdByIp = null)
+        public RefreshToken(string token, int userId, DateTime expiryDate)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token cannot be empty.", nameof(token));
@@ -26,18 +24,17 @@ namespace MyAdvisor.Domain.Entities
             UserId = userId;
             ExpiryDate = expiryDate;
             CreatedAt = DateTime.UtcNow;
-            CreatedByIp = createdByIp;
         }
 
         public bool IsActive => !IsRevoked && DateTime.UtcNow < ExpiryDate;
 
-        public void Revoke(string? revokedByIp = null)
+        public void Revoke()
         {
             if (IsRevoked) return;
 
             IsRevoked = true;
             RevokedAt = DateTime.UtcNow;
-            RevokedByIp = revokedByIp;
+
         }
     }
 }

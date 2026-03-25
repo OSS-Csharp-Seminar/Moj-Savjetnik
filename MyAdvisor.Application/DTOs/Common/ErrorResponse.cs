@@ -1,4 +1,4 @@
-namespace MyAdvisor.Application.DTOs
+namespace MyAdvisor.Application.DTOs.Common
 {
     public record ErrorResponse(string Error);
 }

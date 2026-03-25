@@ -1,4 +1,6 @@
-namespace MyAdvisor.Application.Interfaces
+using MyAdvisor.Application.Interfaces.Contracts;
+
+namespace MyAdvisor.Application.Interfaces.Services
 {
     public interface ITokenService
     {

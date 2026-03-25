@@ -1,3 +1,5 @@
+using MyAdvisor.Domain.Enums;
+
 namespace MyAdvisor.Domain.Entities
 {
     public class Transaction
@@ -8,12 +10,12 @@ namespace MyAdvisor.Domain.Entities
         public decimal Amount { get; private set; }
         public string? Description { get; private set; }
         public DateTime TransactionDate { get; private set; }
-        public string? PaymentMethod { get; private set; }
+        public PaymentMethod? PaymentMethod { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public FinancialDiary? Diary { get; private set; }
         public Category? Category { get; private set; }
 
-        private Transaction() { }
+        private Transaction() { } // For EF Core
 
         public Transaction(
             int diaryId,
@@ -21,7 +23,7 @@ namespace MyAdvisor.Domain.Entities
             int? categoryId = null,
             string? description = null,
             DateTime? transactionDate = null,
-            string? paymentMethod = null)
+            PaymentMethod? paymentMethod = null)
         {
             if (diaryId <= 0)
                 throw new ArgumentException("Invalid diaryId.", nameof(diaryId));

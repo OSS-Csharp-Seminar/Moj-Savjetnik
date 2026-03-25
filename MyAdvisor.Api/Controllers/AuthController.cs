@@ -1,7 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using MyAdvisor.Application.DTOs;
-using MyAdvisor.Application.Interfaces;
+using MyAdvisor.Application.DTOs.Auth;
+using MyAdvisor.Application.DTOs.Common;
+using MyAdvisor.Application.Interfaces.Services;
 
 namespace MyAdvisor.Api.Controllers
 {
@@ -24,7 +25,7 @@ namespace MyAdvisor.Api.Controllers
                 var result = await _authService.RegisterAsync(request);
                 return StatusCode(StatusCodes.Status201Created, result);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(new ErrorResponse(ex.Message));
             }
@@ -40,7 +41,7 @@ namespace MyAdvisor.Api.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return Unauthorized();
+                return Unauthorized(new ErrorResponse("Invalid email or password."));
             }
         }
 

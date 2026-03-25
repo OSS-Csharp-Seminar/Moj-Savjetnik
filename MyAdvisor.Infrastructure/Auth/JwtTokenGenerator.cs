@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using MyAdvisor.Application.Interfaces;
+using MyAdvisor.Application.Interfaces.Contracts;
 
 namespace MyAdvisor.Infrastructure.Auth
 {

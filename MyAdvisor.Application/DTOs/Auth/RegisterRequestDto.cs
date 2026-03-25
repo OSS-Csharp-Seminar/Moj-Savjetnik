@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MyAdvisor.Application.DTOs
+namespace MyAdvisor.Application.DTOs.Auth
 {
     public record RegisterRequestDto(
         [Required][EmailAddress] string Email,

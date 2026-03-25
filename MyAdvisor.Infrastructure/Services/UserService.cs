@@ -1,0 +1,39 @@
+using MyAdvisor.Application.DTOs.User;
+using MyAdvisor.Application.Interfaces.Repositories;
+using MyAdvisor.Application.Interfaces.Services;
+using MyAdvisor.Application.Mappers;
+using MyAdvisor.Domain.Entities;
+
+namespace MyAdvisor.Infrastructure.Services
+{
+    public class UserService : IUserService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly UserMapper _mapper;
+
+        public UserService(IUserRepository userRepository, UserMapper mapper)
+        {
+            _userRepository = userRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UserDto?> GetByIdAsync(int id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            return user is null ? null : _mapper.ToDto(user);
+        }
+
+        public async Task<UserDto?> GetByEmailAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            return user is null ? null : _mapper.ToDto(user);
+        }
+
+        public async Task<UserDto> CreateAsync(string username, string email)
+        {
+            var user = new User(username, email);
+            await _userRepository.AddAsync(user);
+            return _mapper.ToDto(user);
+        }
+    }
+}

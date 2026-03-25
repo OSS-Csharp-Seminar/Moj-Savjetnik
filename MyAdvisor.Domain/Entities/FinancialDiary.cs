@@ -12,7 +12,7 @@ namespace MyAdvisor.Domain.Entities
         public User? User { get; private set; }
         public IReadOnlyCollection<Transaction> Transactions => _transactions.AsReadOnly();
 
-        private FinancialDiary() { }
+        private FinancialDiary() { } // For EF Core
 
         public FinancialDiary(int userId, DateTime date, string? notes = null)
         {
@@ -25,6 +25,24 @@ namespace MyAdvisor.Domain.Entities
         }
 
         public void UpdateNotes(string? notes) => Notes = notes;
+
+        public void AddTransaction(Transaction transaction)
+        {
+            if (transaction is null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            _transactions.Add(transaction);
+            RecalculateTotalAmount();
+        }
+
+        public void RemoveTransaction(Transaction transaction)
+        {
+            if (transaction is null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            _transactions.Remove(transaction);
+            RecalculateTotalAmount();
+        }
 
         public void RecalculateTotalAmount()
             => TotalAmount = _transactions.Sum(t => t.Amount);

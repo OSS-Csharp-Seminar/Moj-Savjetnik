@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using MyAdvisor.Application.Interfaces;
+using MyAdvisor.Application.Interfaces.Contracts;
 
 namespace MyAdvisor.Infrastructure.Identity
 {

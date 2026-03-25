@@ -5,14 +5,12 @@ namespace MyAdvisor.Domain.Entities
         public int Id { get; private set; }
         public string Username { get; private set; }
         public string Email { get; private set; }
-        public string PasswordHash { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
-        private User()
+        private User() // For EF Core
         {
             Username = null!;
             Email = null!;
-            PasswordHash = null!;
         }
 
         public User(string username, string email)
@@ -25,16 +23,8 @@ namespace MyAdvisor.Domain.Entities
 
             Username = username;
             Email = email;
-            PasswordHash = string.Empty;
             CreatedAt = DateTime.UtcNow;
-        }
 
-        public void SetPasswordHash(string passwordHash)
-        {
-            if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("Password hash cannot be empty.", nameof(passwordHash));
-
-            PasswordHash = passwordHash;
         }
     }
 }

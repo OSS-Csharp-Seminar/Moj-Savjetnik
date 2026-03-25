@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyAdvisor.Domain.Entities;
+using MyAdvisor.Domain.Enums;
 using MyAdvisor.Infrastructure.Identity;
 
 namespace MyAdvisor.Infrastructure.Persistence
@@ -19,7 +20,9 @@ namespace MyAdvisor.Infrastructure.Persistence
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options) { }
+            : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,6 +60,10 @@ namespace MyAdvisor.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(t => t.CategoryId);
 
+            modelBuilder.Entity<Transaction>()
+                .Property(t => t.PaymentMethod)
+                .HasConversion<string>();
+
             modelBuilder.Entity<TransactionAiLog>()
                 .HasOne(l => l.Transaction)
                 .WithMany()
@@ -66,6 +73,10 @@ namespace MyAdvisor.Infrastructure.Persistence
                 .HasOne(l => l.AiCategory)
                 .WithMany()
                 .HasForeignKey(l => l.AiCategoryId);
+
+            modelBuilder.Entity<RecurringTransaction>()
+                .Property(r => r.Frequency)
+                .HasConversion<string>();
 
             modelBuilder.Entity<RecurringTransaction>()
                 .HasOne(r => r.User)

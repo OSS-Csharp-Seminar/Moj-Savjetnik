@@ -1,8 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MyAdvisor.Infrastructure.Persistence;
+using MyAdvisor.Application.Interfaces.Repositories;
 
 namespace MyAdvisor.Infrastructure.Services
 {
@@ -30,14 +29,10 @@ namespace MyAdvisor.Infrastructure.Services
         private async Task CleanupAsync()
         {
             using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var repository = scope.ServiceProvider.GetRequiredService<IRefreshTokenRepository>();
 
-            var deleted = await db.RefreshTokens
-                .Where(t => t.IsRevoked || t.ExpiryDate < DateTime.UtcNow)
-                .ExecuteDeleteAsync();
-
-            if (deleted > 0)
-                _logger.LogInformation("Deleted {Count} expired or revoked refresh tokens.", deleted);
+            await repository.DeleteExpiredAndRevokedAsync();
+            _logger.LogInformation("Expired and revoked refresh tokens cleaned up.");
         }
     }
 }
