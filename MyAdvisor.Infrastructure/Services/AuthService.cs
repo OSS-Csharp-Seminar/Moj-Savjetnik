@@ -1,5 +1,5 @@
 using MyAdvisor.Application.DTOs.Auth;
-using MyAdvisor.Application.Interfaces;
+using MyAdvisor.Application.Interfaces.Contracts;
 using MyAdvisor.Application.Interfaces.Services;
 
 namespace MyAdvisor.Infrastructure.Services

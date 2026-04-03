@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MyAdvisor.Application.Interfaces;
+using MyAdvisor.Application.Interfaces.Contracts;
 using MyAdvisor.Application.Interfaces.Repositories;
 using MyAdvisor.Application.Interfaces.Services;
 using MyAdvisor.Application.Mappers;
@@ -11,9 +11,10 @@ using MyAdvisor.Infrastructure.Auth;
 using MyAdvisor.Infrastructure.Identity;
 using MyAdvisor.Infrastructure.Persistence;
 using MyAdvisor.Infrastructure.Repositories;
+using MyAdvisor.Infrastructure.Services;
 using UnitOfWork = MyAdvisor.Infrastructure.Persistence.UnitOfWork;
 
-namespace MyAdvisor.Infrastructure.Services
+namespace MyAdvisor.Infrastructure
 {
     public static class DependencyInjection
     {

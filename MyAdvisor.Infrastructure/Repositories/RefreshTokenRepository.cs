@@ -31,9 +31,8 @@ namespace MyAdvisor.Infrastructure.Repositories
 
         public async Task DeleteExpiredAndRevokedAsync()
         {
-            await _db.RefreshTokens
-                .Where(t => t.IsRevoked || t.ExpiryDate < DateTime.UtcNow)
-                .ExecuteDeleteAsync();
+            await _db.Database.ExecuteSqlRawAsync(
+                "DELETE FROM `RefreshTokens` WHERE `IsRevoked` = TRUE OR `ExpiryDate` < UTC_TIMESTAMP()");
         }
     }
 }

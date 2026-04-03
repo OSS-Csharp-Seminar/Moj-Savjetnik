@@ -1,4 +1,4 @@
-namespace MyAdvisor.Application.Interfaces
+namespace MyAdvisor.Application.Interfaces.Contracts
 {
     public interface IUnitOfWork
     {
