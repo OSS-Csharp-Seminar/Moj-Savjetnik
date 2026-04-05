@@ -1,0 +1,70 @@
+@page "/login"
+@inject AuthService AuthService
+@inject NavigationManager Nav
+
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
+        <p class="text-sm text-gray-500 mb-8">Log in to your MyAdvisor account</p>
+
+        <EditForm Model="model" OnValidSubmit="HandleSubmit" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+                <label class="text-sm font-medium text-gray-700">Email</label>
+                <InputText @bind-Value="model.Email" type="email" placeholder="you@example.com"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-sm font-medium text-gray-700">Password</label>
+                <InputText @bind-Value="model.Password" type="password" placeholder="••••••••"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <p class="text-sm text-red-500">@error</p>
+            }
+
+            <button type="submit" disabled="@loading"
+                class="mt-2 w-full py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                @(loading ? "Logging in..." : "Log in")
+            </button>
+        </EditForm>
+
+        <p class="mt-6 text-center text-sm text-gray-500">
+            Don't have an account?
+            <a href="/register" class="text-indigo-600 font-medium hover:underline">Sign up</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private LoginModel model = new();
+    private string error = "";
+    private bool loading;
+
+    private async Task HandleSubmit()
+    {
+        error = "";
+        loading = true;
+        try
+        {
+            var tokens = await AuthService.LoginAsync(model.Email, model.Password);
+            await AuthService.SaveTokensAsync(tokens);
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}

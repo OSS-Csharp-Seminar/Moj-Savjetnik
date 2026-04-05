@@ -9,7 +9,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendDev", policy =>
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5103", "https://localhost:7192")
               .AllowAnyHeader()
               .AllowAnyMethod());
 });

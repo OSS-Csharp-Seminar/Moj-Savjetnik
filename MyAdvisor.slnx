@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="MyAdvisor.Api/MyAdvisor.Api.csproj" />
   <Project Path="MyAdvisor.Application/MyAdvisor.Application.csproj" />
+  <Project Path="MyAdvisor.Client/MyAdvisor.Client.csproj" />
   <Project Path="MyAdvisor.Domain/MyAdvisor.Domain.csproj" />
   <Project Path="MyAdvisor.Infrastructure/MyAdvisor.Infrastructure.csproj" />
 </Solution>
