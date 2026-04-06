@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using MyAdvisor.Application.Interfaces.Contracts;
 using MyAdvisor.Infrastructure.Identity;
 
-namespace MyAdvisor.Infrastructure.Services
+namespace MyAdvisor.Infrastructure.Services.Auth
 {
     public class IdentityService
     {

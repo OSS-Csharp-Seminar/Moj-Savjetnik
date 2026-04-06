@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyAdvisor.Application.Interfaces.Repositories;
 
-namespace MyAdvisor.Infrastructure.Services
+namespace MyAdvisor.Infrastructure.Services.Background
 {
     public class RefreshTokenCleanupService : BackgroundService
     {

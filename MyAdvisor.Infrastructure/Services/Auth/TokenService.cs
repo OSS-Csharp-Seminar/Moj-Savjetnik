@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MyAdvisor.Application.Interfaces.Contracts;
 using MyAdvisor.Application.Interfaces.Repositories;
-using MyAdvisor.Application.Interfaces.Services;
+using MyAdvisor.Application.Interfaces.Services.Auth;
 using MyAdvisor.Domain.Entities;
 using MyAdvisor.Infrastructure.Auth;
 using MyAdvisor.Infrastructure.Identity;
 
-namespace MyAdvisor.Infrastructure.Services
+namespace MyAdvisor.Infrastructure.Services.Auth
 {
     public class TokenService : ITokenService
     {

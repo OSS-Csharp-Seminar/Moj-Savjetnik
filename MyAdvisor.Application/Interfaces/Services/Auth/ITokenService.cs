@@ -1,6 +1,6 @@
 using MyAdvisor.Application.Interfaces.Contracts;
 
-namespace MyAdvisor.Application.Interfaces.Services
+namespace MyAdvisor.Application.Interfaces.Services.Auth
 {
     public interface ITokenService
     {

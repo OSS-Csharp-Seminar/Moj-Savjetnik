@@ -1,0 +1,562 @@
+@page "/diary"
+@inject AuthService AuthService
+@inject DiaryService DiaryService
+@inject TransactionService TransactionService
+@inject CategoryService CategoryService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<nav class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+    <span class="text-xl font-semibold text-gray-900">MyAdvisor</span>
+    <button @onclick="LogoutAsync" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        Log out
+    </button>
+</nav>
+
+<main class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Financial Diary</h1>
+        <button @onclick="ToggleCreateForm"
+            class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+            + New Entry
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(pageError))
+    {
+        <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            @pageError
+        </div>
+    }
+
+    @if (showCreateForm)
+    {
+        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <h2 class="text-sm font-semibold text-gray-700 mb-4">New Diary Entry</h2>
+            <EditForm Model="createModel" OnValidSubmit="CreateDiaryAsync" class="flex flex-col gap-3">
+                <DataAnnotationsValidator />
+                <div class="flex gap-3">
+                    <div class="flex flex-col gap-1 flex-1">
+                        <label class="text-sm font-medium text-gray-700">Date</label>
+                        <InputDate @bind-Value="createModel.Date"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                        <ValidationMessage For="@(() => createModel.Date)" class="text-sm text-red-500" />
+                    </div>
+                    <div class="flex flex-col gap-1 flex-1">
+                        <label class="text-sm font-medium text-gray-700">Notes</label>
+                        <InputText @bind-Value="createModel.Notes" placeholder="Optional notes"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    </div>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button type="button" @onclick="ToggleCreateForm"
+                        class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" disabled="@createLoading"
+                        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                        @(createLoading ? "Saving..." : "Save")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+    @if (loading)
+    {
+        <p class="text-sm text-gray-400 text-center py-12">Loading...</p>
+    }
+    else if (!diaries.Any())
+    {
+        <p class="text-sm text-gray-400 text-center py-12">No diary entries yet. Create your first one.</p>
+    }
+    else
+    {
+        <div class="flex flex-col gap-4">
+            @foreach (var diary in diaries.OrderByDescending(d => d.Date).ThenByDescending(d => d.Id))
+            {
+                var isExpanded = expandedDiaryIds.Contains(diary.Id);
+                var isLoadingTx = loadingDiaryIds.Contains(diary.Id);
+                var diaryTx = transactionsByDiary.GetValueOrDefault(diary.Id, []);
+                var diaryAddModel = addTxModels.GetValueOrDefault(diary.Id);
+
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">@diary.Date.ToString("MMM dd, yyyy")</p>
+                                @if (!string.IsNullOrEmpty(diary.Notes))
+                                {
+                                    <p class="text-xs text-gray-400 mt-0.5">@diary.Notes</p>
+                                }
+                            </div>
+                            <span class="text-sm font-medium text-indigo-600">
+                                @diary.TotalAmount.ToString("N2")€
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button @onclick="() => ToggleTransactions(diary.Id)"
+                                class="px-3 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                                @(isExpanded ? "Hide" : "Transactions")
+                            </button>
+                            <button @onclick="() => DeleteDiaryAsync(diary.Id)"
+                                class="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (isExpanded)
+                    {
+                        <div class="border-t border-gray-100 px-6 py-4 bg-gray-50">
+                            @if (isLoadingTx)
+                            {
+                                <p class="text-sm text-gray-400">Loading transactions...</p>
+                            }
+                            else
+                            {
+                                @if (diaryTx.Any())
+                                {
+                                    <div class="flex flex-col gap-2 mb-4">
+                                        @foreach (var tx in diaryTx.OrderByDescending(t => t.TransactionDate))
+                                        {
+                                            @if (editingTxId == tx.Id)
+                                            {
+                                                <div class="bg-white px-4 py-3 rounded-lg border border-indigo-200">
+                                                    <EditForm Model="editTxModel" OnValidSubmit="() => SaveEditTransactionAsync(tx.Id, diary.Id)">
+                                                        <DataAnnotationsValidator />
+                                                        <div class="flex gap-2 items-start flex-wrap">
+                                                            <div class="flex flex-col gap-1 min-w-28">
+                                                                <div class="relative flex items-center">
+                                                                    <input type="text" inputmode="decimal"
+                                                                        value="@FormatAmountValue(editTxModel.Amount)"
+                                                                        placeholder="0.00"
+                                                                        @onchange="@(e => editTxModel.Amount = ParseAmountInput(e.Value?.ToString()))"
+                                                                        class="w-full px-3 py-2 pr-7 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                                    <span class="absolute right-2.5 text-sm text-gray-400 pointer-events-none select-none">€</span>
+                                                                </div>
+                                                                <ValidationMessage For="@(() => editTxModel.Amount)" class="text-xs text-red-500" />
+                                                            </div>
+                                                            <div class="flex flex-col gap-1 flex-1 min-w-32">
+                                                                <InputText @bind-Value="editTxModel.Description" placeholder="Description"
+                                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                                <ValidationMessage For="@(() => editTxModel.Description)" class="text-xs text-red-500" />
+                                                            </div>
+                                                            <InputDate @bind-Value="editTxModel.TransactionDate"
+                                                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                            <div class="flex flex-col gap-1">
+                                                                <select @bind="editTxModel.PaymentMethod"
+                                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                                    <option value="" disabled selected>Method</option>
+                                                                    <option value="Cash">Cash</option>
+                                                                    <option value="Card">Card</option>
+                                                                    <option value="Transfer">Transfer</option>
+                                                                    <option value="Other">Other</option>
+                                                                </select>
+                                                                <ValidationMessage For="@(() => editTxModel.PaymentMethod)" class="text-xs text-red-500" />
+                                                            </div>
+                                                            <div class="flex flex-col gap-1">
+                                                                <select @bind="editTxModel.CategoryId"
+                                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                                    <option value="" disabled selected>Category</option>
+                                                                    @foreach (var root in categories.Where(c => c.ParentCategoryId == null))
+                                                                    {
+                                                                        var subs = categories.Where(c => c.ParentCategoryId == root.Id).ToList();
+                                                                        @if (subs.Any())
+                                                                        {
+                                                                            <option value="" disabled>@root.Name</option>
+                                                                            @foreach (var sub in subs)
+                                                                            {
+                                                                                <option value="@sub.Id">— @sub.Name</option>
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <option value="@root.Id">@root.Name</option>
+                                                                        }
+                                                                    }
+                                                                </select>
+                                                                <ValidationMessage For="@(() => editTxModel.CategoryId)" class="text-xs text-red-500" />
+                                                            </div>
+                                                            <div class="flex gap-2">
+                                                                <button type="button" @onclick="CancelEdit"
+                                                                    class="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                                                    Cancel
+                                                                </button>
+                                                                <button type="submit" disabled="@editTxLoading"
+                                                                    class="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                                                                    @(editTxLoading ? "Saving..." : "Save")
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </EditForm>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="flex items-center justify-between bg-white px-4 py-2 rounded-lg border border-gray-100">
+                                                    <div>
+                                                        <p class="text-sm text-gray-800">@(tx.Description ?? "—")</p>
+                                                        <p class="text-xs text-gray-400">
+                                                            @tx.TransactionDate.ToString("MMM dd")
+                                                            @if (!string.IsNullOrEmpty(tx.PaymentMethod))
+                                                            {
+                                                                <span> · @tx.PaymentMethod</span>
+                                                            }
+                                                            @if (GetCategoryName(tx.CategoryId) is { } catName)
+                                                            {
+                                                                <span> · @catName</span>
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-medium text-gray-900 mr-1">@tx.Amount.ToString("N2")€</span>
+                                                        <button @onclick="() => StartEditTransaction(tx, diary.Id)"
+                                                            class="px-3 py-1 text-xs font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                                                            Edit
+                                                        </button>
+                                                        <button @onclick="() => DeleteTransactionAsync(tx.Id, diary.Id)"
+                                                            class="px-3 py-1 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-sm text-gray-400 mb-4">No transactions yet.</p>
+                                }
+
+                                @if (diaryAddModel is not null)
+                                {
+                                    <EditForm Model="diaryAddModel" OnValidSubmit="() => AddTransactionAsync(diary.Id)">
+                                        <DataAnnotationsValidator />
+                                        <div class="flex gap-2 items-start flex-wrap">
+                                            <div class="flex flex-col gap-1">
+                                                <div class="relative flex items-center">
+                                                    <input type="text" inputmode="decimal"
+                                                        value="@FormatAmountValue(diaryAddModel.Amount)"
+                                                        placeholder="0.00"
+                                                        @onchange="@(e => diaryAddModel.Amount = ParseAmountInput(e.Value?.ToString()))"
+                                                        class="w-28 px-3 py-2 pr-7 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                    <span class="absolute right-2.5 text-sm text-gray-400 pointer-events-none select-none">€</span>
+                                                </div>
+                                                <ValidationMessage For="@(() => diaryAddModel.Amount)" class="text-xs text-red-500" />
+                                            </div>
+                                            <div class="flex flex-col gap-1 flex-1 min-w-32">
+                                                <InputText @bind-Value="diaryAddModel.Description" placeholder="Description"
+                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                <ValidationMessage For="@(() => diaryAddModel.Description)" class="text-xs text-red-500" />
+                                            </div>
+                                            <InputDate @bind-Value="diaryAddModel.TransactionDate"
+                                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                            <div class="flex flex-col gap-1">
+                                                <select @bind="diaryAddModel.PaymentMethod"
+                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                    <option value="" disabled selected>Method</option>
+                                                    <option value="Cash">Cash</option>
+                                                    <option value="Card">Card</option>
+                                                    <option value="Transfer">Transfer</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                                <ValidationMessage For="@(() => diaryAddModel.PaymentMethod)" class="text-xs text-red-500" />
+                                            </div>
+                                            <div class="flex flex-col gap-1">
+                                                <select @bind="diaryAddModel.CategoryId"
+                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                    <option value="" disabled selected>Category</option>
+                                                    @foreach (var root in categories.Where(c => c.ParentCategoryId == null))
+                                                    {
+                                                        var subs = categories.Where(c => c.ParentCategoryId == root.Id).ToList();
+                                                        @if (subs.Any())
+                                                        {
+                                                            <option value="" disabled>@root.Name</option>
+                                                            @foreach (var sub in subs)
+                                                            {
+                                                                <option value="@sub.Id">— @sub.Name</option>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@root.Id">@root.Name</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <ValidationMessage For="@(() => diaryAddModel.CategoryId)" class="text-xs text-red-500" />
+                                            </div>
+                                            <button type="submit" disabled="@(addTxLoadingId == diary.Id)"
+                                                class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                                                @(addTxLoadingId == diary.Id ? "..." : "Add")
+                                            </button>
+                                        </div>
+                                    </EditForm>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</main>
+
+@code {
+    private List<FinancialDiaryModel> diaries = [];
+    private List<CategoryModel> categories = [];
+
+    private HashSet<int> expandedDiaryIds = [];
+    private HashSet<int> loadingDiaryIds = [];
+    private Dictionary<int, List<TransactionModel>> transactionsByDiary = new();
+    private Dictionary<int, AddTransactionModel> addTxModels = new();
+
+    private bool loading;
+    private bool showCreateForm;
+    private bool createLoading;
+    private bool editTxLoading;
+
+    private int? editingTxId;
+    private int? editingDiaryId;
+    private int? addTxLoadingId;
+    private string pageError = "";
+    private CreateDiaryModel createModel = new();
+    private UpdateTransactionModel editTxModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (!await AuthService.IsAuthenticatedAsync())
+            {
+                Nav.NavigateTo("/login");
+                return;
+            }
+            await Task.WhenAll(LoadDiariesAsync(), LoadCategoriesAsync());
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Initialization error: {ex.Message}";
+        }
+    }
+
+    private async Task LoadDiariesAsync()
+    {
+        loading = true;
+        try
+        {
+            diaries = await DiaryService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to load diary entries: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        try
+        {
+            categories = await CategoryService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to load categories: {ex.Message}";
+        }
+    }
+
+    private void ToggleCreateForm()
+    {
+        showCreateForm = !showCreateForm;
+        createModel = new();
+    }
+
+    private async Task CreateDiaryAsync()
+    {
+        pageError = "";
+        createLoading = true;
+        try
+        {
+            var diary = await DiaryService.CreateAsync(createModel);
+            diaries.Add(diary);
+            showCreateForm = false;
+            createModel = new();
+            expandedDiaryIds.Add(diary.Id);
+            transactionsByDiary[diary.Id] = [];
+            addTxModels[diary.Id] = new();
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to create diary: {ex.Message}";
+        }
+        createLoading = false;
+    }
+
+    private async Task DeleteDiaryAsync(int id)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Delete this diary entry and all its transactions?"))
+            return;
+
+        pageError = "";
+        try
+        {
+            await DiaryService.DeleteAsync(id);
+            diaries.RemoveAll(d => d.Id == id);
+            expandedDiaryIds.Remove(id);
+            transactionsByDiary.Remove(id);
+            addTxModels.Remove(id);
+            loadingDiaryIds.Remove(id);
+            if (editingDiaryId == id) CancelEdit();
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to delete diary: {ex.Message}";
+        }
+    }
+
+    private async Task ToggleTransactions(int diaryId)
+    {
+        if (expandedDiaryIds.Contains(diaryId))
+        {
+            expandedDiaryIds.Remove(diaryId);
+            transactionsByDiary.Remove(diaryId);
+            addTxModels.Remove(diaryId);
+            if (editingDiaryId == diaryId) CancelEdit();
+            return;
+        }
+
+        expandedDiaryIds.Add(diaryId);
+        addTxModels[diaryId] = new();
+        loadingDiaryIds.Add(diaryId);
+        try
+        {
+            transactionsByDiary[diaryId] = await TransactionService.GetByDiaryIdAsync(diaryId);
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to load transactions: {ex.Message}";
+            transactionsByDiary[diaryId] = [];
+        }
+        loadingDiaryIds.Remove(diaryId);
+    }
+
+    private async Task AddTransactionAsync(int diaryId)
+    {
+        if (!addTxModels.TryGetValue(diaryId, out var model)) return;
+        pageError = "";
+        addTxLoadingId = diaryId;
+        try
+        {
+            var tx = await TransactionService.AddAsync(diaryId, model);
+            transactionsByDiary[diaryId].Add(tx);
+            var diary = diaries.FirstOrDefault(d => d.Id == diaryId);
+            if (diary is not null)
+                diaries[diaries.IndexOf(diary)] = diary with { TotalAmount = diary.TotalAmount + tx.Amount };
+            addTxModels[diaryId] = new() { TransactionDate = model.TransactionDate };
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to add transaction: {ex.Message}";
+        }
+        addTxLoadingId = null;
+    }
+
+    private void StartEditTransaction(TransactionModel tx, int diaryId)
+    {
+        editingTxId = tx.Id;
+        editingDiaryId = diaryId;
+        editTxModel = new()
+        {
+            Amount = tx.Amount,
+            Description = tx.Description,
+            TransactionDate = tx.TransactionDate,
+            PaymentMethod = tx.PaymentMethod,
+            CategoryId = tx.CategoryId
+        };
+    }
+
+    private void CancelEdit()
+    {
+        editingTxId = null;
+        editingDiaryId = null;
+        editTxModel = new();
+    }
+
+    private async Task SaveEditTransactionAsync(int txId, int diaryId)
+    {
+        pageError = "";
+        editTxLoading = true;
+        try
+        {
+            var updated = await TransactionService.UpdateAsync(txId, editTxModel);
+            if (transactionsByDiary.TryGetValue(diaryId, out var list))
+            {
+                var idx = list.FindIndex(t => t.Id == txId);
+                if (idx >= 0)
+                {
+                    var old = list[idx];
+                    list[idx] = updated;
+                    var diary = diaries.FirstOrDefault(d => d.Id == diaryId);
+                    if (diary is not null)
+                        diaries[diaries.IndexOf(diary)] = diary with { TotalAmount = diary.TotalAmount - old.Amount + updated.Amount };
+                }
+            }
+            CancelEdit();
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to update transaction: {ex.Message}";
+        }
+        editTxLoading = false;
+    }
+
+    private async Task DeleteTransactionAsync(int transactionId, int diaryId)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Remove this transaction?"))
+            return;
+
+        pageError = "";
+        try
+        {
+            await TransactionService.DeleteAsync(transactionId);
+            if (transactionsByDiary.TryGetValue(diaryId, out var list))
+            {
+                var tx = list.FirstOrDefault(t => t.Id == transactionId);
+                if (tx is not null)
+                {
+                    list.Remove(tx);
+                    var diary = diaries.FirstOrDefault(d => d.Id == diaryId);
+                    if (diary is not null)
+                        diaries[diaries.IndexOf(diary)] = diary with { TotalAmount = diary.TotalAmount - tx.Amount };
+                }
+            }
+            if (editingTxId == transactionId) CancelEdit();
+        }
+        catch (Exception ex)
+        {
+            pageError = $"Failed to remove transaction: {ex.Message}";
+        }
+    }
+
+    private static string FormatAmountValue(decimal amount)
+        => amount > 0 ? amount.ToString("F2") : "";
+
+    private static decimal ParseAmountInput(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return 0;
+        return decimal.TryParse(input.Replace(',', '.'),
+            System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : 0;
+    }
+
+    private string? GetCategoryName(int? categoryId)
+        => categoryId is null ? null : categories.FirstOrDefault(c => c.Id == categoryId)?.Name;
+
+    private async Task LogoutAsync()
+    {
+        await AuthService.LogoutAsync();
+        Nav.NavigateTo("/login");
+    }
+}

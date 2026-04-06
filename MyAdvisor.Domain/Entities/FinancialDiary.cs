@@ -26,6 +26,8 @@ namespace MyAdvisor.Domain.Entities
 
         public void UpdateNotes(string? notes) => Notes = notes;
 
+        public void UpdateTotalAmount(decimal total) => TotalAmount = total;
+
         public void AddTransaction(Transaction transaction)
         {
             if (transaction is null)

@@ -1,6 +1,6 @@
 using MyAdvisor.Application.DTOs.User;
 
-namespace MyAdvisor.Application.Interfaces.Services
+namespace MyAdvisor.Application.Interfaces.Services.Domain
 {
     public interface IUserService
     {

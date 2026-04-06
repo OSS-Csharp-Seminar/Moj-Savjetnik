@@ -13,5 +13,8 @@ obj/
 .DS_Store
 Thumbs.db
 
+# Node
+node_modules/
+
 # Claude Code
 .claude/

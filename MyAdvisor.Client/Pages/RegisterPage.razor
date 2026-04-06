@@ -8,16 +8,19 @@
         <p class="text-sm text-gray-500 mb-8">Start managing your finances today</p>
 
         <EditForm Model="model" OnValidSubmit="HandleSubmit" class="flex flex-col gap-4">
+            <DataAnnotationsValidator />
             <div class="flex gap-3 min-w-0">
                 <div class="flex flex-col gap-1 min-w-0 flex-1">
                     <label class="text-sm font-medium text-gray-700">First name</label>
                     <InputText @bind-Value="model.FirstName" placeholder="John"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    <ValidationMessage For="@(() => model.FirstName)" class="text-sm text-red-500" />
                 </div>
                 <div class="flex flex-col gap-1 min-w-0 flex-1">
                     <label class="text-sm font-medium text-gray-700">Last name</label>
                     <InputText @bind-Value="model.LastName" placeholder="Doe"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    <ValidationMessage For="@(() => model.LastName)" class="text-sm text-red-500" />
                 </div>
             </div>
 
@@ -25,18 +28,21 @@
                 <label class="text-sm font-medium text-gray-700">Email</label>
                 <InputText @bind-Value="model.Email" type="email" placeholder="you@example.com"
                     class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                <ValidationMessage For="@(() => model.Email)" class="text-sm text-red-500" />
             </div>
 
             <div class="flex flex-col gap-1">
                 <label class="text-sm font-medium text-gray-700">Password</label>
                 <InputText @bind-Value="model.Password" type="password" placeholder="••••••••"
                     class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                <ValidationMessage For="@(() => model.Password)" class="text-sm text-red-500" />
             </div>
 
             <div class="flex flex-col gap-1">
                 <label class="text-sm font-medium text-gray-700">Confirm password</label>
                 <InputText @bind-Value="model.Confirm" type="password" placeholder="••••••••"
                     class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                <ValidationMessage For="@(() => model.Confirm)" class="text-sm text-red-500" />
             </div>
 
             @if (!string.IsNullOrEmpty(error))
@@ -62,13 +68,14 @@
     private string error = "";
     private bool loading;
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (await AuthService.IsAuthenticatedAsync())
+            Nav.NavigateTo("/diary");
+    }
+
     private async Task HandleSubmit()
     {
-        if (model.Password != model.Confirm)
-        {
-            error = "Passwords do not match";
-            return;
-        }
         error = "";
         loading = true;
         try
@@ -84,14 +91,5 @@
         {
             loading = false;
         }
-    }
-
-    private class RegisterModel
-    {
-        public string FirstName { get; set; } = "";
-        public string LastName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string Confirm { get; set; } = "";
     }
 }

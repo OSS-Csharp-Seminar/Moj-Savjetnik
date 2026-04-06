@@ -5,13 +5,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyAdvisor.Application.Interfaces.Contracts;
 using MyAdvisor.Application.Interfaces.Repositories;
-using MyAdvisor.Application.Interfaces.Services;
+using MyAdvisor.Application.Interfaces.Services.Domain;
+using MyAdvisor.Application.Interfaces.Services.Auth;
+using MyAdvisor.Application.Interfaces.Services.App;
 using MyAdvisor.Application.Mappers;
 using MyAdvisor.Infrastructure.Auth;
 using MyAdvisor.Infrastructure.Identity;
 using MyAdvisor.Infrastructure.Persistence;
 using MyAdvisor.Infrastructure.Repositories;
-using MyAdvisor.Infrastructure.Services;
+using MyAdvisor.Application.Services;
+using MyAdvisor.Infrastructure.Services.Background;
+using MyAdvisor.Infrastructure.Services.Auth;
 using UnitOfWork = MyAdvisor.Infrastructure.Persistence.UnitOfWork;
 
 namespace MyAdvisor.Infrastructure
@@ -48,14 +52,31 @@ namespace MyAdvisor.Infrastructure
                     Microsoft.Extensions.Options.Options.Create(jwtSettings)).Create();
             });
 
+            // Core
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddSingleton<JwtTokenGenerator>();
+
+            // Mappers
             services.AddScoped<UserMapper>();
+            services.AddScoped<CategoryMapper>();
+            services.AddScoped<FinancialDiaryMapper>();
+            services.AddScoped<TransactionMapper>();
+
+            // Identity services
             services.AddScoped<IdentityService>();
             services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
 
+            // Domain services
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IFinancialDiaryService, FinancialDiaryService>();
+            services.AddScoped<ITransactionService, TransactionService>();
+
+            // App services
+            services.AddScoped<IDiaryTransactionService, DiaryTransactionService>();
+
+            // Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -65,6 +86,7 @@ namespace MyAdvisor.Infrastructure
             services.AddScoped<ITransactionAiLogRepository, TransactionAiLogRepository>();
             services.AddScoped<ISpendingStatisticRepository, SpendingStatisticRepository>();
 
+            // Background services
             services.AddHostedService<RefreshTokenCleanupService>();
 
             return services;

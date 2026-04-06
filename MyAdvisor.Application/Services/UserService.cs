@@ -1,10 +1,10 @@
 using MyAdvisor.Application.DTOs.User;
 using MyAdvisor.Application.Interfaces.Repositories;
-using MyAdvisor.Application.Interfaces.Services;
+using MyAdvisor.Application.Interfaces.Services.Domain;
 using MyAdvisor.Application.Mappers;
 using MyAdvisor.Domain.Entities;
 
-namespace MyAdvisor.Infrastructure.Services
+namespace MyAdvisor.Application.Services
 {
     public class UserService : IUserService
     {

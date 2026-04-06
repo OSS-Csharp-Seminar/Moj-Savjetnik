@@ -12,4 +12,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.5" PrivateAssets="all" />
   </ItemGroup>
 
+  <Target Name="InstallNpmPackages" BeforeTargets="BuildTailwind"
+          Condition="!Exists('$(MSBuildProjectDirectory)\node_modules')">
+    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <Target Name="BuildTailwind" BeforeTargets="Build">
+    <Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
 </Project>

@@ -17,6 +17,23 @@ namespace MyAdvisor.Domain.Entities
 
         private Transaction() { } // For EF Core
 
+        public void Update(
+            decimal amount,
+            int? categoryId,
+            string? description,
+            DateTime transactionDate,
+            PaymentMethod? paymentMethod)
+        {
+            if (amount == 0)
+                throw new ArgumentException("Amount cannot be zero.", nameof(amount));
+
+            Amount = amount;
+            CategoryId = categoryId;
+            Description = description;
+            TransactionDate = transactionDate;
+            PaymentMethod = paymentMethod;
+        }
+
         public Transaction(
             int diaryId,
             decimal amount,

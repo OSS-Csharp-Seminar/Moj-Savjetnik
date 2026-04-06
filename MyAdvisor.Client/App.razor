@@ -1,6 +1,20 @@
 <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        <ErrorBoundary>
+            <ChildContent>
+                <RouteView RouteData="@routeData" />
+            </ChildContent>
+            <ErrorContent Context="ex">
+                <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+                    <div class="bg-white border border-red-200 rounded-xl p-8 max-w-md w-full shadow-sm">
+                        <p class="text-sm font-semibold text-red-600 mb-2">Something went wrong</p>
+                        <p class="text-xs text-gray-500 mb-4">@ex.Message</p>
+                        <a href="/" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                            Go home
+                        </a>
+                    </div>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
     </Found>
 </Router>

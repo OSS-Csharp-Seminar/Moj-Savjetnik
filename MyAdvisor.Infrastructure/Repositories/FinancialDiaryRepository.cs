@@ -17,6 +17,11 @@ namespace MyAdvisor.Infrastructure.Repositories
         public Task<FinancialDiary?> GetByIdAsync(int id)
             => _db.FinancialDiaries.FirstOrDefaultAsync(d => d.Id == id);
 
+        public Task<FinancialDiary?> GetByIdWithTransactionsAsync(int id)
+            => _db.FinancialDiaries
+                .Include(d => d.Transactions)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
         public async Task<IReadOnlyList<FinancialDiary>> GetByUserIdAsync(int userId)
             => await _db.FinancialDiaries.Where(d => d.UserId == userId).ToListAsync();
 

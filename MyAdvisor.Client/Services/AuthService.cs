@@ -1,4 +1,6 @@
 using Microsoft.JSInterop;
+using MyAdvisor.Client.Models.Auth;
+using MyAdvisor.Client.Models.Common;
 using System.Net.Http.Json;
 
 namespace MyAdvisor.Client.Services;
@@ -11,7 +13,7 @@ public class AuthService(HttpClient http, IJSRuntime js)
         if (!res.IsSuccessStatusCode)
         {
             var data = await res.Content.ReadFromJsonAsync<ErrorResponse>();
-            throw new Exception(data?.Error ?? "Registration failed");
+            throw new Exception(data?.Error ?? "Registration failed.");
         }
     }
 
@@ -19,7 +21,10 @@ public class AuthService(HttpClient http, IJSRuntime js)
     {
         var res = await http.PostAsJsonAsync("/api/auth/login", new { email, password });
         if (!res.IsSuccessStatusCode)
-            throw new Exception("Invalid email or password");
+        {
+            var data = await res.Content.ReadFromJsonAsync<ErrorResponse>();
+            throw new Exception(data?.Error ?? "Invalid email or password.");
+        }
         return (await res.Content.ReadFromJsonAsync<AuthResponse>())!;
     }
 
@@ -28,8 +33,23 @@ public class AuthService(HttpClient http, IJSRuntime js)
         await js.InvokeVoidAsync("localStorage.setItem", "accessToken", tokens.AccessToken);
         await js.InvokeVoidAsync("localStorage.setItem", "refreshToken", tokens.RefreshToken);
     }
+
+    public async Task<bool> IsAuthenticatedAsync()
+    {
+        var token = await js.InvokeAsync<string?>("localStorage.getItem", "accessToken");
+        return !string.IsNullOrEmpty(token);
+    }
+
+    public async Task LogoutAsync()
+    {
+        var refreshToken = await js.InvokeAsync<string?>("localStorage.getItem", "refreshToken");
+        if (!string.IsNullOrEmpty(refreshToken))
+        {
+            try { await http.PostAsJsonAsync("/api/auth/revoke", new { refreshToken }); }
+            catch { }
+        }
+
+        await js.InvokeVoidAsync("localStorage.removeItem", "accessToken");
+        await js.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
+    }
 }
-
-public record AuthResponse(string AccessToken, string RefreshToken);
-
-public record ErrorResponse(string Error);

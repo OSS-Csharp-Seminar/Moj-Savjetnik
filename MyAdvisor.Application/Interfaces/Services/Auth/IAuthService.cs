@@ -1,6 +1,6 @@
-﻿using MyAdvisor.Application.DTOs.Auth;
+using MyAdvisor.Application.DTOs.Auth;
 
-namespace MyAdvisor.Application.Interfaces.Services
+namespace MyAdvisor.Application.Interfaces.Services.Auth
 {
     public interface IAuthService
     {

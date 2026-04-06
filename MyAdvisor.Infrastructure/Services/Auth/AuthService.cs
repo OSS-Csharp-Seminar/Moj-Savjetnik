@@ -1,8 +1,9 @@
 using MyAdvisor.Application.DTOs.Auth;
 using MyAdvisor.Application.Interfaces.Contracts;
-using MyAdvisor.Application.Interfaces.Services;
+using MyAdvisor.Application.Interfaces.Services.Domain;
+using MyAdvisor.Application.Interfaces.Services.Auth;
 
-namespace MyAdvisor.Infrastructure.Services
+namespace MyAdvisor.Infrastructure.Services.Auth
 {
     public class AuthService : IAuthService
     {
