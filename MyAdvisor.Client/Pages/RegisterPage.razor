@@ -2,8 +2,8 @@
 @inject AuthService AuthService
 @inject NavigationManager Nav
 
-<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-    <div class="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+<div class="min-h-screen bg-white flex items-center justify-center px-4">
+    <div class="w-full max-w-sm bg-white rounded-xl shadow-[0_4px_6px_-1px_rgb(0_0_0/0.1)] border border-[#E5E7EB] p-8">
         <h1 class="text-2xl font-bold text-gray-900 mb-1">Create an account</h1>
         <p class="text-sm text-gray-500 mb-8">Start managing your finances today</p>
 
@@ -13,13 +13,13 @@
                 <div class="flex flex-col gap-1 min-w-0 flex-1">
                     <label class="text-sm font-medium text-gray-700">First name</label>
                     <InputText @bind-Value="model.FirstName" placeholder="John"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                        class="w-full px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                     <ValidationMessage For="@(() => model.FirstName)" class="text-sm text-red-500" />
                 </div>
                 <div class="flex flex-col gap-1 min-w-0 flex-1">
                     <label class="text-sm font-medium text-gray-700">Last name</label>
                     <InputText @bind-Value="model.LastName" placeholder="Doe"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                        class="w-full px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                     <ValidationMessage For="@(() => model.LastName)" class="text-sm text-red-500" />
                 </div>
             </div>
@@ -27,21 +27,21 @@
             <div class="flex flex-col gap-1">
                 <label class="text-sm font-medium text-gray-700">Email</label>
                 <InputText @bind-Value="model.Email" type="email" placeholder="you@example.com"
-                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                 <ValidationMessage For="@(() => model.Email)" class="text-sm text-red-500" />
             </div>
 
             <div class="flex flex-col gap-1">
                 <label class="text-sm font-medium text-gray-700">Password</label>
                 <InputText @bind-Value="model.Password" type="password" placeholder="••••••••"
-                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                 <ValidationMessage For="@(() => model.Password)" class="text-sm text-red-500" />
             </div>
 
             <div class="flex flex-col gap-1">
                 <label class="text-sm font-medium text-gray-700">Confirm password</label>
                 <InputText @bind-Value="model.Confirm" type="password" placeholder="••••••••"
-                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                 <ValidationMessage For="@(() => model.Confirm)" class="text-sm text-red-500" />
             </div>
 
@@ -51,14 +51,14 @@
             }
 
             <button type="submit" disabled="@loading"
-                class="mt-2 w-full py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                class="mt-2 w-full py-2 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 transition-colors disabled:opacity-60">
                 @(loading ? "Creating account..." : "Create account")
             </button>
         </EditForm>
 
         <p class="mt-6 text-center text-sm text-gray-500">
             Already have an account?
-            <a href="/login" class="text-indigo-600 font-medium hover:underline">Log in</a>
+            <a href="/login" class="text-slate-900 font-medium hover:underline">Log in</a>
         </p>
     </div>
 </div>

@@ -6,7 +6,7 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 
-<nav class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+<nav class="bg-white border-b border-[#E5E7EB] px-8 py-4 flex items-center justify-between">
     <span class="text-xl font-semibold text-gray-900">MyAdvisor</span>
     <button @onclick="LogoutAsync" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
         Log out
@@ -17,21 +17,21 @@
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Financial Diary</h1>
         <button @onclick="ToggleCreateForm"
-            class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+            class="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 transition-colors">
             + New Entry
         </button>
     </div>
 
     @if (!string.IsNullOrEmpty(pageError))
     {
-        <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+        <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
             @pageError
         </div>
     }
 
     @if (showCreateForm)
     {
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div class="bg-white border border-[#E5E7EB] rounded-xl p-6 mb-6 shadow-[0_4px_6px_-1px_rgb(0_0_0/0.1)]">
             <h2 class="text-sm font-semibold text-gray-700 mb-4">New Diary Entry</h2>
             <EditForm Model="createModel" OnValidSubmit="CreateDiaryAsync" class="flex flex-col gap-3">
                 <DataAnnotationsValidator />
@@ -39,22 +39,22 @@
                     <div class="flex flex-col gap-1 flex-1">
                         <label class="text-sm font-medium text-gray-700">Date</label>
                         <InputDate @bind-Value="createModel.Date"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                            class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                         <ValidationMessage For="@(() => createModel.Date)" class="text-sm text-red-500" />
                     </div>
                     <div class="flex flex-col gap-1 flex-1">
                         <label class="text-sm font-medium text-gray-700">Notes</label>
                         <InputText @bind-Value="createModel.Notes" placeholder="Optional notes"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                            class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                     </div>
                 </div>
                 <div class="flex gap-2 justify-end">
                     <button type="button" @onclick="ToggleCreateForm"
-                        class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        class="px-4 py-2 text-sm text-gray-600 border border-[#E5E7EB] rounded-md hover:bg-gray-50 transition-colors">
                         Cancel
                     </button>
                     <button type="submit" disabled="@createLoading"
-                        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                        class="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 transition-colors disabled:opacity-60">
                         @(createLoading ? "Saving..." : "Save")
                     </button>
                 </div>
@@ -80,7 +80,7 @@
                 var diaryTx = transactionsByDiary.GetValueOrDefault(diary.Id, []);
                 var diaryAddModel = addTxModels.GetValueOrDefault(diary.Id);
 
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white border border-[#E5E7EB] rounded-xl shadow-[0_4px_6px_-1px_rgb(0_0_0/0.1)] overflow-hidden">
                     <div class="px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div>
@@ -90,17 +90,17 @@
                                     <p class="text-xs text-gray-400 mt-0.5">@diary.Notes</p>
                                 }
                             </div>
-                            <span class="text-sm font-medium text-indigo-600">
+                            <span class="text-sm font-semibold text-slate-900">
                                 @diary.TotalAmount.ToString("N2")€
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
                             <button @onclick="() => ToggleTransactions(diary.Id)"
-                                class="px-3 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                                class="px-3 py-1.5 text-sm font-medium text-slate-700 border border-[#E5E7EB] rounded-md hover:bg-gray-50 transition-colors">
                                 @(isExpanded ? "Hide" : "Transactions")
                             </button>
                             <button @onclick="() => DeleteDiaryAsync(diary.Id)"
-                                class="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                                class="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-200 rounded-md hover:bg-red-50 transition-colors">
                                 Delete
                             </button>
                         </div>
@@ -108,7 +108,7 @@
 
                     @if (isExpanded)
                     {
-                        <div class="border-t border-gray-100 px-6 py-4 bg-gray-50">
+                        <div class="border-t border-[#E5E7EB] px-6 py-4 bg-gray-50">
                             @if (isLoadingTx)
                             {
                                 <p class="text-sm text-gray-400">Loading transactions...</p>
@@ -122,7 +122,7 @@
                                         {
                                             @if (editingTxId == tx.Id)
                                             {
-                                                <div class="bg-white px-4 py-3 rounded-lg border border-indigo-200">
+                                                <div class="bg-white px-4 py-3 rounded-md border border-[#E5E7EB] shadow-[0_4px_6px_-1px_rgb(0_0_0/0.1)]">
                                                     <EditForm Model="editTxModel" OnValidSubmit="() => SaveEditTransactionAsync(tx.Id, diary.Id)">
                                                         <DataAnnotationsValidator />
                                                         <div class="flex gap-2 items-start flex-wrap">
@@ -132,21 +132,21 @@
                                                                         value="@FormatAmountValue(editTxModel.Amount)"
                                                                         placeholder="0.00"
                                                                         @onchange="@(e => editTxModel.Amount = ParseAmountInput(e.Value?.ToString()))"
-                                                                        class="w-full px-3 py-2 pr-7 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                                        class="w-full px-3 py-2 pr-7 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                                                                     <span class="absolute right-2.5 text-sm text-gray-400 pointer-events-none select-none">€</span>
                                                                 </div>
                                                                 <ValidationMessage For="@(() => editTxModel.Amount)" class="text-xs text-red-500" />
                                                             </div>
                                                             <div class="flex flex-col gap-1 flex-1 min-w-32">
                                                                 <InputText @bind-Value="editTxModel.Description" placeholder="Description"
-                                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                                                                 <ValidationMessage For="@(() => editTxModel.Description)" class="text-xs text-red-500" />
                                                             </div>
                                                             <InputDate @bind-Value="editTxModel.TransactionDate"
-                                                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                                class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                                                             <div class="flex flex-col gap-1">
                                                                 <select @bind="editTxModel.PaymentMethod"
-                                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition">
                                                                     <option value="" disabled selected>Method</option>
                                                                     <option value="Cash">Cash</option>
                                                                     <option value="Card">Card</option>
@@ -157,7 +157,7 @@
                                                             </div>
                                                             <div class="flex flex-col gap-1">
                                                                 <select @bind="editTxModel.CategoryId"
-                                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition">
                                                                     <option value="" disabled selected>Category</option>
                                                                     @foreach (var root in categories.Where(c => c.ParentCategoryId == null))
                                                                     {
@@ -180,11 +180,11 @@
                                                             </div>
                                                             <div class="flex gap-2">
                                                                 <button type="button" @onclick="CancelEdit"
-                                                                    class="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                                                    class="px-3 py-2 text-sm text-gray-600 border border-[#E5E7EB] rounded-md hover:bg-gray-50 transition-colors">
                                                                     Cancel
                                                                 </button>
                                                                 <button type="submit" disabled="@editTxLoading"
-                                                                    class="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                                                                    class="px-3 py-2 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 transition-colors disabled:opacity-60">
                                                                     @(editTxLoading ? "Saving..." : "Save")
                                                                 </button>
                                                             </div>
@@ -194,7 +194,7 @@
                                             }
                                             else
                                             {
-                                                <div class="flex items-center justify-between bg-white px-4 py-2 rounded-lg border border-gray-100">
+                                                <div class="flex items-center justify-between bg-white px-4 py-3 rounded-md border border-[#E5E7EB] shadow-[0_4px_6px_-1px_rgb(0_0_0/0.1)]">
                                                     <div>
                                                         <p class="text-sm text-gray-800">@(tx.Description ?? "—")</p>
                                                         <p class="text-xs text-gray-400">
@@ -210,13 +210,13 @@
                                                         </p>
                                                     </div>
                                                     <div class="flex items-center gap-2">
-                                                        <span class="text-sm font-medium text-gray-900 mr-1">@tx.Amount.ToString("N2")€</span>
+                                                        <span class="text-sm font-semibold text-slate-900 mr-1">@tx.Amount.ToString("N2")€</span>
                                                         <button @onclick="() => StartEditTransaction(tx, diary.Id)"
-                                                            class="px-3 py-1 text-xs font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                                                            class="px-3 py-1 text-xs font-medium text-slate-700 border border-[#E5E7EB] rounded-md hover:bg-gray-50 transition-colors">
                                                             Edit
                                                         </button>
                                                         <button @onclick="() => DeleteTransactionAsync(tx.Id, diary.Id)"
-                                                            class="px-3 py-1 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                                                            class="px-3 py-1 text-xs font-medium text-red-500 border border-red-200 rounded-md hover:bg-red-50 transition-colors">
                                                             Remove
                                                         </button>
                                                     </div>
@@ -241,21 +241,21 @@
                                                         value="@FormatAmountValue(diaryAddModel.Amount)"
                                                         placeholder="0.00"
                                                         @onchange="@(e => diaryAddModel.Amount = ParseAmountInput(e.Value?.ToString()))"
-                                                        class="w-28 px-3 py-2 pr-7 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                        class="w-28 px-3 py-2 pr-7 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                                                     <span class="absolute right-2.5 text-sm text-gray-400 pointer-events-none select-none">€</span>
                                                 </div>
                                                 <ValidationMessage For="@(() => diaryAddModel.Amount)" class="text-xs text-red-500" />
                                             </div>
                                             <div class="flex flex-col gap-1 flex-1 min-w-32">
                                                 <InputText @bind-Value="diaryAddModel.Description" placeholder="Description"
-                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                                                 <ValidationMessage For="@(() => diaryAddModel.Description)" class="text-xs text-red-500" />
                                             </div>
                                             <InputDate @bind-Value="diaryAddModel.TransactionDate"
-                                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                                                class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition" />
                                             <div class="flex flex-col gap-1">
                                                 <select @bind="diaryAddModel.PaymentMethod"
-                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition">
                                                     <option value="" disabled selected>Method</option>
                                                     <option value="Cash">Cash</option>
                                                     <option value="Card">Card</option>
@@ -266,7 +266,7 @@
                                             </div>
                                             <div class="flex flex-col gap-1">
                                                 <select @bind="diaryAddModel.CategoryId"
-                                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                                                    class="px-3 py-2 border border-[#E5E7EB] rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition">
                                                     <option value="" disabled selected>Category</option>
                                                     @foreach (var root in categories.Where(c => c.ParentCategoryId == null))
                                                     {
@@ -288,7 +288,7 @@
                                                 <ValidationMessage For="@(() => diaryAddModel.CategoryId)" class="text-xs text-red-500" />
                                             </div>
                                             <button type="submit" disabled="@(addTxLoadingId == diary.Id)"
-                                                class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+                                                class="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 transition-colors disabled:opacity-60">
                                                 @(addTxLoadingId == diary.Id ? "..." : "Add")
                                             </button>
                                         </div>
