@@ -8,12 +8,15 @@ using MyAdvisor.Application.Interfaces.Repositories;
 using MyAdvisor.Application.Interfaces.Services.Domain;
 using MyAdvisor.Application.Interfaces.Services.Auth;
 using MyAdvisor.Application.Interfaces.Services.App;
+using MyAdvisor.Application.Interfaces.Services.AI;
 using MyAdvisor.Application.Mappers;
+using MyAdvisor.Infrastructure.AI;
 using MyAdvisor.Infrastructure.Auth;
 using MyAdvisor.Infrastructure.Identity;
 using MyAdvisor.Infrastructure.Persistence;
 using MyAdvisor.Infrastructure.Repositories;
 using MyAdvisor.Application.Services;
+using MyAdvisor.Infrastructure.Services.AI;
 using MyAdvisor.Infrastructure.Services.Background;
 using MyAdvisor.Infrastructure.Services.Auth;
 using UnitOfWork = MyAdvisor.Infrastructure.Persistence.UnitOfWork;
@@ -75,6 +78,11 @@ namespace MyAdvisor.Infrastructure
 
             // App services
             services.AddScoped<IDiaryTransactionService, DiaryTransactionService>();
+            services.AddScoped<IAiTransactionImportService, AiTransactionImportService>();
+
+            // AI / Gemini
+            services.Configure<GeminiSettings>(configuration.GetSection("GeminiSettings"));
+            services.AddHttpClient<IGeminiService, GeminiService>();
 
             // Repositories
             services.AddScoped<IUserRepository, UserRepository>();

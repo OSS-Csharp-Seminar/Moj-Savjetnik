@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using MyAdvisor.Infrastructure;
+using MyAdvisor.Infrastructure.Persistence;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
 
@@ -19,14 +21,32 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var retries = 0;
+    while (retries < 10)
+    {
+        try
+        {
+            db.Database.Migrate();
+            break;
+        }
+        catch
+        {
+            retries++;
+            Thread.Sleep(3000);
+        }
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(); // adds UI at /scalar/v1
+    app.MapScalarApiReference();
 }
 
 app.UseCors("FrontendDev");
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
