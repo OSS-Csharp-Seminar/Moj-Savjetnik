@@ -19,8 +19,6 @@ namespace MyAdvisor.Infrastructure.Services.AI
 
         public async Task<string> AnalyzeImageAsync(byte[] imageData, string mimeType, string prompt)
         {
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.Model}:generateContent?key={_settings.ApiKey}";
-
             var requestBody = new
             {
                 contents = new[]
@@ -29,25 +27,49 @@ namespace MyAdvisor.Infrastructure.Services.AI
                     {
                         parts = new object[]
                         {
-                            new
-                            {
-                                inline_data = new
-                                {
-                                    mime_type = mimeType,
-                                    data = Convert.ToBase64String(imageData)
-                                }
-                            },
+                            new { inline_data = new { mime_type = mimeType, data = Convert.ToBase64String(imageData) } },
                             new { text = prompt }
                         }
                     }
                 },
-                generationConfig = new
-                {
-                    temperature = 0.1,
-                    maxOutputTokens = 2048
-                }
+                generationConfig = new { temperature = 0.1, maxOutputTokens = 2048 }
             };
 
+            return await CallGeminiAsync(requestBody);
+        }
+
+        public async Task<string> ChatAsync(string systemPrompt, List<(string Role, string Content)> history, string userMessage)
+        {
+            var contents = new List<object>();
+
+            foreach (var (role, content) in history)
+            {
+                contents.Add(new
+                {
+                    role = role == "assistant" ? "model" : "user",
+                    parts = new[] { new { text = content } }
+                });
+            }
+
+            contents.Add(new
+            {
+                role = "user",
+                parts = new[] { new { text = userMessage } }
+            });
+
+            var requestBody = new
+            {
+                system_instruction = new { parts = new[] { new { text = systemPrompt } } },
+                contents,
+                generationConfig = new { temperature = 0.7, maxOutputTokens = 2048 }
+            };
+
+            return await CallGeminiAsync(requestBody);
+        }
+
+        private async Task<string> CallGeminiAsync(object requestBody)
+        {
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.Model}:generateContent?key={_settings.ApiKey}";
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -58,7 +80,6 @@ namespace MyAdvisor.Infrastructure.Services.AI
                 throw new InvalidOperationException($"Gemini API error ({(int)response.StatusCode}): {rawJson}");
 
             using var doc = JsonDocument.Parse(rawJson);
-
             return doc.RootElement
                 .GetProperty("candidates")[0]
                 .GetProperty("content")

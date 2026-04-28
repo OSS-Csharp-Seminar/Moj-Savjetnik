@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyAdvisor.Application.DTOs.AI;
 using MyAdvisor.Application.DTOs.Common;
 using MyAdvisor.Application.Interfaces.Services.App;
 
@@ -16,9 +17,9 @@ namespace MyAdvisor.Api.Controllers
             _aiImportService = aiImportService;
         }
 
-        [HttpPost("import")]
+        [HttpPost("preview")]
         [RequestSizeLimit(20 * 1024 * 1024)]
-        public async Task<IActionResult> ImportFromImage([FromQuery] int diaryId, IFormFile image)
+        public async Task<IActionResult> Preview([FromQuery] int diaryId, IFormFile image)
         {
             var userId = ResolveUserId();
             if (userId is null) return Unauthorized();
@@ -35,26 +36,29 @@ namespace MyAdvisor.Api.Controllers
                 using var ms = new MemoryStream();
                 await image.CopyToAsync(ms);
 
-                var result = await _aiImportService.ImportFromImageAsync(
-                    diaryId: diaryId,
-                    userId: userId.Value,
-                    imageData: ms.ToArray(),
-                    mimeType: image.ContentType);
+                var result = await _aiImportService.PreviewFromImageAsync(
+                    diaryId, userId.Value, ms.ToArray(), image.ContentType);
 
                 return Ok(result);
             }
-            catch (KeyNotFoundException ex)
+            catch (KeyNotFoundException ex) { return NotFound(new ErrorResponse(ex.Message)); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+            catch (InvalidOperationException ex) { return StatusCode(502, new ErrorResponse($"AI service error: {ex.Message}")); }
+        }
+
+        [HttpPost("confirm")]
+        public async Task<IActionResult> Confirm([FromBody] AiConfirmImportRequestDto request)
+        {
+            var userId = ResolveUserId();
+            if (userId is null) return Unauthorized();
+
+            try
             {
-                return NotFound(new ErrorResponse(ex.Message));
+                var result = await _aiImportService.ConfirmImportAsync(userId.Value, request);
+                return Ok(result);
             }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(StatusCodes.Status502BadGateway, new ErrorResponse($"AI service error: {ex.Message}"));
-            }
+            catch (KeyNotFoundException ex) { return NotFound(new ErrorResponse(ex.Message)); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
         }
     }
 }

@@ -79,6 +79,7 @@ namespace MyAdvisor.Infrastructure
             // App services
             services.AddScoped<IDiaryTransactionService, DiaryTransactionService>();
             services.AddScoped<IAiTransactionImportService, AiTransactionImportService>();
+            services.AddScoped<IFinancialChatService, FinancialChatService>();
 
             // AI / Gemini
             services.Configure<GeminiSettings>(configuration.GetSection("GeminiSettings"));
